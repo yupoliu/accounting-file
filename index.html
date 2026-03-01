@@ -1,136 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-TW">
 <head>
-	<meta http-equiv="content-type" content="text/html; charset=utf-8"/>
-	<title></title>
-	<meta name="generator" content="LibreOffice 24.8.1.2 (Linux)"/>
-	<meta name="created" content="00:00:00"/>
-	<meta name="changed" content="00:00:00"/>
-	<style type="text/css">
-		@page { size: 8.27in 11.69in; margin: 0.79in }
-		p { line-height: 115%; margin-bottom: 0.1in; background: transparent }
-		pre { background: transparent }
-		pre.western { font-family: "Liberation Mono", monospace; font-size: 10pt }
-		pre.cjk { font-family: "NSimSun", monospace; font-size: 10pt }
-		pre.ctl { font-family: "Liberation Mono", monospace; font-size: 10pt }
-	</style>
+    <meta charset="UTF-8">
+    <title>歐米斯訂購單生成器 - 進階版</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+    <style>
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.08); }
+        h2 { color: #2b579a; border-bottom: 3px solid #2b579a; padding-bottom: 10px; }
+        .section-title { background: #e8f0fe; padding: 8px 15px; font-weight: bold; margin: 25px 0 10px; border-left: 5px solid #2b579a; color: #1a337e; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        label { font-size: 0.85em; font-weight: bold; display: block; margin-bottom: 5px; color: #555; }
+        input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 0.9em; }
+        th { background: #f8f9fa; padding: 10px; border: 1px solid #dee2e6; }
+        td { padding: 5px; border: 1px solid #dee2e6; }
+        .checkbox-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; border: 1px solid #eee; background: #fafafa; }
+        button { width: 100%; padding: 18px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.2em; cursor: pointer; margin-top: 30px; transition: 0.3s; }
+        button:hover { background: #1a337e; box-shadow: 0 5px 15px rgba(43,87,154,0.3); }
+    </style>
 </head>
-<body lang="en-US" link="#000080" vlink="#800000" dir="ltr"><pre class="western">&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;zh-TW&quot;&gt;
-&lt;head&gt;
-    &lt;meta charset=&quot;UTF-8&quot;&gt;
-    &lt;title&gt;<font face="NSimSun, monospace"><span lang="zh-CN">歐米斯訂購單生成器</span></font>&lt;/title&gt;
-    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js&quot;&gt;&lt;/script&gt;
-    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js&quot;&gt;&lt;/script&gt;
-    &lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js&quot;&gt;&lt;/script&gt;
-    &lt;style&gt;
-        body { font-family: &quot;Microsoft JhengHei&quot;, sans-serif; background: #eceff1; padding: 20px; color: #333; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        h2 { border-bottom: 2px solid #2b579a; color: #2b579a; padding-bottom: 10px; }
-        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px; }
-        label { font-weight: bold; font-size: 0.9em; display: block; margin-bottom: 5px; }
-        input[type=&quot;text&quot;], input[type=&quot;date&quot;] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .section-title { background: #f0f4f8; padding: 5px 10px; font-weight: bold; margin: 20px 0 10px 0; border-left: 4px solid #2b579a; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; padding: 10px; border: 1px solid #eee; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background: #f9f9f9; }
-        button { width: 100%; padding: 15px; background: #2b579a; color: white; border: none; border-radius: 5px; font-size: 1.1em; cursor: pointer; margin-top: 30px; }
-        button:hover { background: #1e3d6d; }
-    &lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
+<body>
 
-&lt;div class=&quot;container&quot;&gt;
-    &lt;h2&gt;<font face="NSimSun, monospace"><span lang="zh-CN">訂購單資料輸入</span></font>&lt;/h2&gt;
+<div class="container">
+    <h2>歐米斯生技 - 訂購單系統</h2>
     
-    &lt;div class=&quot;section-title&quot;&gt;<font face="NSimSun, monospace"><span lang="zh-CN">基本資訊</span></font>&lt;/div&gt;
-    &lt;div class=&quot;grid&quot;&gt;
-        &lt;div&gt;&lt;label&gt;<font face="NSimSun, monospace"><span lang="zh-CN">進貨廠商</span></font>&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;vender&quot; value=&quot;<font face="NSimSun, monospace"><span lang="zh-CN">鎮江機械</span></font>&quot;&gt;&lt;/div&gt;
-        &lt;div&gt;&lt;label&gt;<font face="NSimSun, monospace"><span lang="zh-CN">訂購日期</span></font>&lt;/label&gt;&lt;input type=&quot;date&quot; id=&quot;date&quot;&gt;&lt;/div&gt;
-        &lt;div&gt;&lt;label&gt;<font face="NSimSun, monospace"><span lang="zh-CN">訂購單號</span></font>&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;order_no&quot;&gt;&lt;/div&gt;
-        &lt;div&gt;&lt;label&gt;<font face="NSimSun, monospace"><span lang="zh-CN">廠商電話</span></font>&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;tel&quot;&gt;&lt;/div&gt;
-        &lt;div&gt;&lt;label&gt;<font face="NSimSun, monospace"><span lang="zh-CN">聯絡人</span></font>&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;contact&quot;&gt;&lt;/div&gt;
-        &lt;div&gt;&lt;label&gt;<font face="NSimSun, monospace"><span lang="zh-CN">訂購人</span></font>&lt;/label&gt;&lt;input type=&quot;text&quot; id=&quot;buyer&quot;&gt;&lt;/div&gt;
-    &lt;/div&gt;
+    <div class="section-title">基本資料</div>
+    <div class="grid">
+        <div><label>進貨廠商</label><input type="text" id="vender" value="鎮江機械"></div>
+        <div><label>訂購日期</label><input type="date" id="date"></div>
+        <div><label>訂購單號</label><input type="text" id="order_no" placeholder="例如: DV20272881"></div>
+        <div><label>廠商電話</label><input type="text" id="tel"></div>
+        <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼 0966540307"></div>
+        <div><label>訂購人</label><input type="text" id="buyer" value="劉俊昇"></div>
+    </div>
 
-    &lt;div class=&quot;section-title&quot;&gt;<font face="NSimSun, monospace"><span lang="zh-CN">類別</span></font>&lt;/div&gt;
-    &lt;div class=&quot;checkbox-group&quot;&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c_1&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">零用金</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c_2&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">實驗室耗材</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c_3&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">設備</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c_4&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">小額採購</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;c_5&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">其他</span></font>&lt;/label&gt;
-    &lt;/div&gt;
+    <div class="section-title">類別與付款 (勾選將顯示 ■)</div>
+    <div class="checkbox-group">
+        <label><input type="checkbox" id="c_1"> 零用金</label>
+        <label><input type="checkbox" id="c_2"> 實驗室耗材</label>
+        <label><input type="checkbox" id="c_3"> 設備</label>
+        <label><input type="checkbox" id="c_4"> 小額採購</label>
+        <label><input type="checkbox" id="p_3" checked> 月結30日</label>
+        <label><input type="checkbox" id="p_6" checked> 帳戶匯款</label>
+        <label><input type="checkbox" id="p_1"> 預付</label>
+        <label><input type="checkbox" id="p_8"> 支票</label>
+    </div>
 
-    &lt;div class=&quot;section-title&quot;&gt;<font face="NSimSun, monospace"><span lang="zh-CN">付款方式</span></font>&lt;/div&gt;
-    &lt;div class=&quot;checkbox-group&quot;&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_1&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">預付</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_2&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">請款</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_3&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">月結</span></font>30<font face="NSimSun, monospace"><span lang="zh-CN">日</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_4&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">現金支付</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_5&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">現金匯款</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_6&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">帳戶匯款</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_7&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">代墊</span></font>&lt;/label&gt;
-        &lt;label&gt;&lt;input type=&quot;checkbox&quot; id=&quot;p_8&quot;&gt; <font face="NSimSun, monospace"><span lang="zh-CN">支票</span></font>&lt;/label&gt;
-    &lt;/div&gt;
+    <div class="section-title">品項明細 (共 7 列)</div>
+    <table id="itemTable">
+        <thead>
+            <tr>
+                <th width="5%">序</th>
+                <th width="50%">品項描述</th>
+                <th width="10%">數量</th>
+                <th width="15%">單價(未稅)</th>
+                <th width="20%">小計</th>
+            </tr>
+        </thead>
+        <tbody id="itemBody">
+            </tbody>
+    </table>
 
-    &lt;div class=&quot;section-title&quot;&gt;<font face="NSimSun, monospace"><span lang="zh-CN">品項明細 </span></font>(<font face="NSimSun, monospace"><span lang="zh-CN">僅示範第一列</span></font>)&lt;/div&gt;
-    &lt;table&gt;
-        &lt;tr&gt;&lt;th&gt;<font face="NSimSun, monospace"><span lang="zh-CN">品項</span></font>&lt;/th&gt;&lt;th&gt;<font face="NSimSun, monospace"><span lang="zh-CN">數量</span></font>&lt;/th&gt;&lt;th&gt;<font face="NSimSun, monospace"><span lang="zh-CN">單價</span></font>(<font face="NSimSun, monospace"><span lang="zh-CN">未稅</span></font>)&lt;/th&gt;&lt;/tr&gt;
-        &lt;tr&gt;
-            &lt;td&gt;&lt;input type=&quot;text&quot; id=&quot;item1&quot; placeholder=&quot;<font face="NSimSun, monospace"><span lang="zh-CN">除鏽處理</span></font>&quot;&gt;&lt;/td&gt;
-            &lt;td&gt;&lt;input type=&quot;text&quot; id=&quot;qty1&quot; value=&quot;1&quot; onchange=&quot;calculate()&quot;&gt;&lt;/td&gt;
-            &lt;td&gt;&lt;input type=&quot;text&quot; id=&quot;price1&quot; value=&quot;28000&quot; onchange=&quot;calculate()&quot;&gt;&lt;/td&gt;
-        &lt;/tr&gt;
-    &lt;/table&gt;
+    <div class="section-title">簽核日期欄位</div>
+    <div class="grid">
+        <div><label>制定日期</label><input type="date" id="issue_date"></div>
+        <div><label>批准日期</label><input type="date" id="approval_date"></div>
+        <div><label>請款日期</label><input type="date" id="request_date"></div>
+        <div><label>付款日期</label><input type="date" id="payment_date"></div>
+    </div>
 
-    &lt;button onclick=&quot;generateDoc()&quot;&gt;<font face="NSimSun, monospace"><span lang="zh-CN">生成並下載 </span></font>Word <font face="NSimSun, monospace"><span lang="zh-CN">訂購單</span></font>&lt;/button&gt;
-&lt;/div&gt;
+    <button onclick="generateDoc()">生成並下載 Word 訂購單</button>
+</div>
 
-&lt;script&gt;
-    // <font face="NSimSun, monospace"><span lang="zh-CN">自動設定今天日期</span></font>
-    document.getElementById('date').value = new Date().toISOString().split('T')[0];
+<script>
+    // 初始化：生成 7 列輸入框並預設日期
+    const today = new Date().toISOString().split('T')[0];
+    ['date', 'issue_date', 'approval_date', 'request_date', 'payment_date'].forEach(id => {
+        document.getElementById(id).value = today;
+    });
+
+    const tbody = document.getElementById('itemBody');
+    for (let i = 1; i <= 7; i++) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${i}</td>
+            <td><input type="text" id="item${i}" placeholder="品項 ${i}"></td>
+            <td><input type="number" id="qty${i}" value="${i===1?1:0}" oninput="calculate()"></td>
+            <td><input type="number" id="price${i}" value="${i===1?28000:0}" oninput="calculate()"></td>
+            <td id="subtotal_display${i}">0</td>
+        `;
+        tbody.appendChild(tr);
+    }
+
+    function calculate() {
+        let totalNet = 0;
+        for (let i = 1; i <= 7; i++) {
+            const q = parseFloat(document.getElementById(`qty${i}`).value) || 0;
+            const p = parseFloat(document.getElementById(`price${i}`).value) || 0;
+            const sub = q * p;
+            document.getElementById(`subtotal_display${i}`).innerText = sub.toLocaleString();
+            totalNet += sub;
+        }
+        return totalNet;
+    }
 
     function generateDoc() {
-        const getCheck = (id) =&gt; document.getElementById(id).checked ? &quot;■&quot; : &quot;□&quot;;
-        const val = (id) =&gt; document.getElementById(id).value;
+        const totalNet = calculate();
+        const tax = Math.round(totalNet * 0.05);
+        const getCheck = (id) => document.getElementById(id).checked ? "■" : "□";
 
-        // <font face="NSimSun, monospace"><span lang="zh-CN">計算金額</span></font>
-        const q1 = parseFloat(val('qty1')) || 0;
-        const p1 = parseFloat(val('price1')) || 0;
-        const sub1 = q1 * p1;
-        const tax = Math.round(sub1 * 0.05);
-
-        const data = {
-            vender: val('vender'), date: val('date'), order_no: val('order_no'),
-            tel: val('tel'), contact: val('contact'), buyer: val('buyer'),
-            // <font face="NSimSun, monospace"><span lang="zh-CN">類別勾選 </span></font>
-            c_1: getCheck('c_1'), c_2: getCheck('c_2'), c_3: getCheck('c_3'), c_4: getCheck('c_4'), c_5: getCheck('c_5'),
-            // <font face="NSimSun, monospace"><span lang="zh-CN">付款方式勾選 </span></font>
-            p_1: getCheck('p_1'), p_2: getCheck('p_2'), p_3: getCheck('p_3'), p_4: getCheck('p_4'), 
-            p_5: getCheck('p_5'), p_6: getCheck('p_6'), p_7: getCheck('p_7'), p_8: getCheck('p_8'),
-            // <font face="NSimSun, monospace"><span lang="zh-CN">表格資料 </span></font>
-            item1: val('item1'), qty1: q1, price1: p1.toLocaleString(), subtotal1: sub1.toLocaleString(),
-            total_net: sub1.toLocaleString(), tax: tax.toLocaleString(), grand_total: (sub1 + tax).toLocaleString()
+        let data = {
+            vender: document.getElementById('vender').value,
+            date: document.getElementById('date').value,
+            order_no: document.getElementById('order_no').value,
+            tel: document.getElementById('tel').value,
+            contact: document.getElementById('contact').value,
+            buyer: document.getElementById('buyer').value,
+            // 類別與付款
+            c_1: getCheck('c_1'), c_2: getCheck('c_2'), c_3: getCheck('c_3'), c_4: getCheck('c_4'), c_5: "□",
+            p_1: getCheck('p_1'), p_2: "□", p_3: getCheck('p_3'), p_4: "□", p_5: "□", p_6: getCheck('p_6'), p_7: "□", p_8: getCheck('p_8'),
+            // 金額
+            total_net: totalNet.toLocaleString(),
+            tax: tax.toLocaleString(),
+            grand_total: (totalNet + tax).toLocaleString(),
+            // 日期
+            issue_date: document.getElementById('issue_date').value,
+            approval_date: document.getElementById('approval_date').value,
+            request_date: document.getElementById('request_date').value,
+            payment_date: document.getElementById('payment_date').value
         };
 
-        JSZipUtils.getBinaryContent(&quot;template.docx&quot;, function(error, content) {
-            if (error) { alert(&quot;<font face="NSimSun, monospace"><span lang="zh-CN">找不到 </span></font>template.docx <font face="NSimSun, monospace"><span lang="zh-CN">檔案！</span></font>&quot;); return; }
+        // 循環加入 7 列資料
+        for (let i = 1; i <= 7; i++) {
+            const q = parseFloat(document.getElementById(`qty${i}`).value) || 0;
+            const p = parseFloat(document.getElementById(`price${i}`).value) || 0;
+            data[`num${i}`] = i;
+            data[`item${i}`] = document.getElementById(`item${i}`).value;
+            data[`qty${i}`] = q || "";
+            data[`price${i}`] = p ? p.toLocaleString() : "";
+            data[`subtotal${i}`] = (q * p) ? (q * p).toLocaleString() : "";
+        }
+
+        JSZipUtils.getBinaryContent("template.docx", function(error, content) {
+            if (error) { alert("讀取 template.docx 失敗！"); return; }
             const zip = new PizZip(content);
             const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
             doc.render(data);
-            const out = doc.getZip().generate({
-                type: &quot;blob&quot;,
-                mimeType: &quot;application/vnd.openxmlformats-officedocument.wordprocessingml.document&quot;,
-            });
-            saveAs(out, `<font face="NSimSun, monospace"><span lang="zh-CN">訂購單</span></font>_${val('vender')}.docx`);
+            const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+            saveAs(out, `訂購單_${data.vender}_${data.date}.docx`);
         });
     }
-&lt;/script&gt;
-
-&lt;/body&gt;
-&lt;/html&gt;</pre>
+</script>
 </body>
 </html>
