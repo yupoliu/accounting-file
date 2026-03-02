@@ -136,14 +136,35 @@
             data[`subtotal${i}`] = (q * p) ? (q * p).toLocaleString() : "";
         }
 
-        JSZipUtils.getBinaryContent("template.docx", function(error, content) {
-            if (error) { alert("讀取失敗！請確認檔案名為 template.docx 且放在根目錄。"); return; }
-            const zip = new PizZip(content);
-            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-            doc.render(data);
-            const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-            saveAs(out, `訂購單_${data.vender}.docx`);
+// 1. 定義絕對路徑並加上時間戳記避免快取
+const templateUrl = "https://yupoliu.github.io/accounting-file/template.docx?t=" + new Date().getTime();
+
+JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
+    if (error) { 
+        console.error(error);
+        alert("讀取失敗！這可能是因為 GitHub Pages 尚未同步更新。\n請嘗試按下 Ctrl+F5 強制重新整理，或使用無痕視窗開啟。"); 
+        return; 
+    }
+    
+    try {
+        const zip = new PizZip(content);
+        const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+        
+        // 2. 執行渲染
+        doc.render(data);
+        
+        const out = doc.getZip().generate({ 
+            type: "blob", 
+            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
         });
+        
+        // 3. 下載檔案
+        saveAs(out, `訂購單_${data.vender}_${data.date}.docx`);
+    } catch (e) {
+        console.error(e);
+        alert("文件渲染出錯，請檢查 Word 模板中的標籤是否正確。");
+    }
+});
     }
 </script>
 </body>
