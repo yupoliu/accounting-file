@@ -30,19 +30,19 @@
 <body>
 
 <div class="container">
-    <h2>歐米斯生技 - 訂購單系統</h2>
+    <h2>歐米斯生技有限公司 - 訂購單生成器</h2>
     
     <div class="section-title">1. 基本資料</div>
     <div class="grid">
-        <div><label>進貨廠商 {vender}</label><input type="text" id="vender" value="鎮江機械"></div>
-        <div><label>訂購日期 {date}</label><input type="date" id="date"></div>
-        <div><label>訂購單號 {order_no}</label><input type="text" id="order_no" value="DV20272881"></div>
-        <div><label>廠商電話 {tel}</label><input type="text" id="tel" value="0912-345-678"></div>
-        <div><label>聯絡人 {contact}</label><input type="text" id="contact" value="張俊埼"></div>
-        <div><label>訂購人 {buyer}</label><input type="text" id="buyer" value="劉俊昇"></div>
+        <div><label>進貨廠商</label><input type="text" id="vender" value="鎮江機械"></div>
+        <div><label>訂購日期</label><input type="date" id="date"></div>
+        <div><label>訂購單號</label><input type="text" id="order_no" value="DV20272881"></div>
+        <div><label>廠商電話</label><input type="text" id="tel" value="0912-345-678"></div>
+        <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼"></div>
+        <div><label>訂購人</label><input type="text" id="buyer" value="劉俊昇"></div>
     </div>
 
-    <div class="section-title">2. 類別 {c_1}~{c_5}</div>
+    <div class="section-title">2. 類別 (對應 {c_1} ~ {c_5})</div>
     <div class="checkbox-group">
         <label class="checkbox-item"><input type="checkbox" id="c_1"> 零用金</label>
         <label class="checkbox-item"><input type="checkbox" id="c_2"> 實驗耗材/檢測</label>
@@ -51,7 +51,7 @@
         <label class="checkbox-item"><input type="checkbox" id="c_5" checked> 其他</label>
     </div>
 
-    <div class="section-title">3. 付款方式 {p_1}~{p_8}</div>
+    <div class="section-title">3. 付款方式 (對應 {p_1} ~ {p_8})</div>
     <div class="checkbox-group">
         <label class="checkbox-item"><input type="checkbox" id="p_1"> 預付</label>
         <label class="checkbox-item"><input type="checkbox" id="p_2"> 請款</label>
@@ -68,15 +68,14 @@
         <thead>
             <tr>
                 <th width="5%">序</th>
-                <th width="15%">貨號 {num}</th>
-                <th width="35%">品項描述 {item}</th>
-                <th width="10%">數量 {qty}</th>
-                <th width="15%">單價 {price}</th>
-                <th width="20%">小計 {subtotal}</th>
+                <th width="15%">貨號</th>
+                <th width="35%">品項描述</th>
+                <th width="10%">數量</th>
+                <th width="15%">單價(未稅)</th>
+                <th width="20%">小計</th>
             </tr>
         </thead>
-        <tbody id="itemBody">
-            </tbody>
+        <tbody id="itemBody"></tbody>
     </table>
 
     <div class="summary-box">
@@ -87,21 +86,23 @@
 
     <div class="section-title">5. 簽核日期</div>
     <div class="grid">
-        <div><label>制定日期 {issue_date}</label><input type="date" id="issue_date"></div>
-        <div><label>批准日期 {approval_date}</label><input type="date" id="approval_date"></div>
-        <div><label>請款日期 {request_date}</label><input type="date" id="request_date"></div>
-        <div><label>付款日期 {payment_date}</label><input type="date" id="payment_date"></div>
+        <div><label>制定日期</label><input type="date" id="issue_date"></div>
+        <div><label>批准日期</label><input type="date" id="approval_date"></div>
+        <div><label>請款日期</label><input type="date" id="request_date"></div>
+        <div><label>付款日期</label><input type="date" id="payment_date"></div>
     </div>
 
     <button onclick="generateDoc()">確認並生成 Word 訂購單</button>
 </div>
 
 <script>
-    // 初始化日期
+    // 自動填入今日日期
     const today = new Date().toISOString().split('T')[0];
-    ['date', 'issue_date', 'approval_date', 'request_date', 'payment_date'].forEach(id => document.getElementById(id).value = today);
+    ['date', 'issue_date', 'approval_date', 'request_date', 'payment_date'].forEach(id => {
+        document.getElementById(id).value = today;
+    });
 
-    // 生成 7 列表格
+    // 動態生成 7 列表格
     const tbody = document.getElementById('itemBody');
     for (let i = 1; i <= 7; i++) {
         const tr = document.createElement('tr');
@@ -136,13 +137,13 @@
         const res = calculate();
         const getCheck = (id) => document.getElementById(id).checked ? "■" : "□";
         
-        // 關鍵修正：加上隨機參數避免 GitHub 讀取舊快取
+        // 關鍵路徑修正：使用完整的絕對路徑並增加時間戳記防止快取
         const templateUrl = "https://yupoliu.github.io/accounting-file/template.docx?v=" + new Date().getTime();
 
         JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
             if (error) { 
-                alert("讀取 template.docx 失敗！\n1. 請確認檔案上傳至 GitHub 且檔名正確。\n2. 請按 Ctrl+F5 強制刷新網頁。"); 
-                console.error(error);
+                alert("讀取 template.docx 失敗！\n1. 請確認檔案已上傳至 GitHub 根目錄。\n2. 請按 Ctrl+F5 強制刷新網頁或使用無痕視窗。"); 
+                console.error("Fetch Error:", error);
                 return; 
             }
             
@@ -157,15 +158,15 @@
                     tel: document.getElementById('tel').value,
                     contact: document.getElementById('contact').value,
                     buyer: document.getElementById('buyer').value,
-                    // 勾選框
+                    // 勾選框狀態
                     c_1: getCheck('c_1'), c_2: getCheck('c_2'), c_3: getCheck('c_3'), c_4: getCheck('c_4'), c_5: getCheck('c_5'),
                     p_1: getCheck('p_1'), p_2: getCheck('p_2'), p_3: getCheck('p_3'), p_4: getCheck('p_4'),
                     p_5: getCheck('p_5'), p_6: getCheck('p_6'), p_7: getCheck('p_7'), p_8: getCheck('p_8'),
-                    // 金額
+                    // 金額合計
                     total_net: res.totalNet.toLocaleString(),
                     tax: res.tax.toLocaleString(),
                     grand_total: res.grand.toLocaleString(),
-                    // 備註日期
+                    // 底部署名日期
                     issue_date: document.getElementById('issue_date').value,
                     approval_date: document.getElementById('approval_date').value,
                     request_date: document.getElementById('request_date').value,
@@ -184,11 +185,14 @@
                 }
 
                 doc.render(data);
-                const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+                const out = doc.getZip().generate({ 
+                    type: "blob", 
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+                });
                 saveAs(out, `訂購單_${data.vender}_${data.date}.docx`);
             } catch (e) {
-                console.error(e);
-                alert("文件渲染失敗！這通常是因為 Word 模板中的標籤（如 {total_net}）格式損壞。建議重新輸入該標籤。");
+                console.error("Render Error:", e);
+                alert("文件渲染失敗！這通常是因為 Word 模板中標籤（如 {total_net}）包含多餘空格或損壞。");
             }
         });
     }
