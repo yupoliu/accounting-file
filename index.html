@@ -9,53 +9,74 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
         body { font-family: "Microsoft JhengHei", sans-serif; background: #f4f7f9; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .section-title { background: #e8f0fe; padding: 10px; font-weight: bold; margin: 20px 0 10px; border-left: 5px solid #2b579a; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        label { font-size: 0.9em; font-weight: bold; }
         input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #2b579a; color: white; padding: 8px; }
-        td { border: 1px solid #ddd; padding: 5px; }
-        .summary { text-align: right; background: #fffde7; padding: 15px; border: 1px solid #ffe082; font-weight: bold; margin-top: 10px; }
-        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.2em; cursor: pointer; margin-top: 20px; }
+        th { background: #2b579a; color: white; padding: 10px; }
+        td { border: 1px solid #ddd; padding: 8px; }
+        .summary { text-align: right; background: #fffde7; padding: 20px; border: 1px solid #ffe082; font-weight: bold; margin-top: 20px; }
+        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.25em; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>歐米斯生技 - 訂購單生成</h2>
+    <h2>歐米斯生技 - 訂購單系統</h2>
     
-    <div class="section-title">基本資料</div>
+    <div class="section-title">1. 基本資料</div>
     <div class="grid">
-        <div><label>廠商</label><input type="text" id="vender" value="鎮江機械"></div>
-        <div><label>日期</label><input type="date" id="date"></div>
-        <div><label>單號</label><input type="text" id="order_no" value="DV20272881"></div>
+        <div><label>進貨廠商</label><input type="text" id="vender" value="鎮江機械"></div>
+        <div><label>訂購日期</label><input type="date" id="date"></div>
+        <div><label>訂購單號</label><input type="text" id="order_no" value="DV20272881"></div>
+        <div><label>廠商電話</label><input type="text" id="tel" value="0212345678"></div>
         <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼"></div>
-        <div><label>訂購人</label><input type="text" id="buyer" value="劉俊昇"></div>
-        <div><label>電話</label><input type="text" id="tel"></div>
+        <div><label>訂購人 {buyer}</label><input type="text" id="buyer" value="劉俊昇"></div>
     </div>
 
-    <div class="section-title">選項</div>
-    <div style="display:flex; gap:20px; background:#f9f9f9; padding:10px;">
-        <label><input type="checkbox" id="c_5" checked> 其他類別</label>
+    <div class="section-title">2. 類別 {c_1}~{c_5}</div>
+    <div class="checkbox-group">
+        <label><input type="checkbox" id="c_1"> 零用金</label>
+        <label><input type="checkbox" id="c_2"> 實驗耗材/檢測</label>
+        <label><input type="checkbox" id="c_3"> 設備</label>
+        <label><input type="checkbox" id="c_4"> 小額採購</label>
+        <label><input type="checkbox" id="c_5" checked> 其他</label>
+    </div>
+
+    <div class="section-title">3. 付款方式 {p_1}~{p_8}</div>
+    <div class="checkbox-group">
+        <label><input type="checkbox" id="p_1"> 預付</label>
+        <label><input type="checkbox" id="p_2"> 請款</label>
         <label><input type="checkbox" id="p_3" checked> 月結30日</label>
+        <label><input type="checkbox" id="p_4"> 現金支付</label>
+        <label><input type="checkbox" id="p_5"> 現金匯款</label>
         <label><input type="checkbox" id="p_6" checked> 帳戶匯款</label>
+        <label><input type="checkbox" id="p_7"> 代墊</label>
+        <label><input type="checkbox" id="p_8"> 支票</label>
     </div>
 
+    <div class="section-title">4. 品項明細</div>
     <table>
-        <thead><tr><th>序</th><th>貨號</th><th>品項</th><th>數量</th><th>單價</th><th>小計</th></tr></thead>
+        <thead>
+            <tr><th>序</th><th>貨號</th><th>品項描述</th><th>數量</th><th>單價</th><th>小計</th></tr>
+        </thead>
         <tbody id="itemBody"></tbody>
     </table>
 
     <div class="summary">
-        合計(未稅): <span id="display_net">0</span> | 稅額: <span id="display_tax">0</span> | 總計: <span id="display_grand">0</span>
+        合計 (未稅) {total_net}: <span id="display_net">0</span><br>
+        稅額 (5%) {tax}: <span id="display_tax">0</span><br>
+        總計 {grand_total}: <span id="display_grand">0</span>
     </div>
 
-    <button onclick="generateDoc()">下載訂購單 (防崩潰版)</button>
+    <button onclick="generateDoc()">生成並下載訂購單</button>
 </div>
 
 <script>
-    // 初始化
+    // 初始化日期與表格
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
     const tbody = document.getElementById('itemBody');
     for (let i = 1; i <= 7; i++) {
@@ -85,19 +106,18 @@
 
     function generateDoc() {
         const res = calculate();
-        const getM = (id) => document.getElementById(id) && document.getElementById(id).checked ? "■" : "□";
+        const getM = (id) => document.getElementById(id).checked ? "▓" : "☐";
+        // 2. 加上隨機數確保讀取到最新上傳的 template.docx
         const templateUrl = "template.docx?v=" + new Date().getTime();
 
         JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
-            if (error) { alert("讀取 Word 檔案失敗！"); return; }
-            
+            if (error) { alert("讀取 Word 模板失敗！請確認檔案已上傳至 GitHub。"); return; }
             try {
-                const zip = new PizZip(content);
-                // 關鍵優化：nullGetter 防止因為 Word 標籤打錯而崩潰
+                // 使用 window.PizZip 確保正確引用
+                const zip = new window.PizZip(content);
                 const doc = new window.docxtemplater(zip, { 
-                    paragraphLoop: true, 
-                    linebreaks: true,
-                    nullGetter: function() { return ""; } 
+                    paragraphLoop: true, linebreaks: true,
+                    nullGetter() { return ""; }
                 });
 
                 const data = {
@@ -110,8 +130,10 @@
                     total_net: res.totalNet.toLocaleString(),
                     tax: res.tax.toLocaleString(),
                     grand_total: res.grand.toLocaleString(),
-                    c_1:getM('c_1'), c_2:getM('c_2'), c_3:getM('c_3'), c_4:getM('c_4'), c_5:getM('c_5'),
-                    p_1:getM('p_1'), p_2:getM('p_2'), p_3:getM('p_3'), p_4:getM('p_4'), p_5:getM('p_5'), p_6:getM('p_6'), p_7:getM('p_7'), p_8:getM('p_8'),
+                    // 對應模板中的勾選框標籤
+                    c_1: getM('c_1'), c_2: getM('c_2'), c_3: getM('c_3'), c_4: getM('c_4'), c_5: getM('c_5'),
+                    p_1: getM('p_1'), p_2: getM('p_2'), p_3: getM('p_3'), p_4: getM('p_4'), p_5: getM('p_5'), p_6: getM('p_6'), p_7: getM('p_7'), p_8: getM('p_8'),
+                    // 底部簽核日期（預設同步訂購日期）
                     issue_date: document.getElementById('date').value,
                     approval_date: document.getElementById('date').value,
                     request_date: document.getElementById('date').value,
@@ -119,20 +141,19 @@
                 };
 
                 for (let i = 1; i <= 7; i++) {
-                    data["num"+i] = document.getElementById("num"+i).value;
-                    data["item"+i] = document.getElementById("item"+i).value;
-                    data["qty"+i] = document.getElementById("qty"+i).value || "";
-                    data["price"+i] = document.getElementById("price"+i).value || "";
-                    data["subtotal"+i] = (document.getElementById("qty"+i).value * document.getElementById("price"+i).value).toLocaleString();
+                    data[`num${i}`] = document.getElementById(`num${i}`).value;
+                    data[`item${i}`] = document.getElementById(`item${i}`).value;
+                    data[`qty${i}`] = document.getElementById(`qty${i}`).value || "";
+                    data[`price${i}`] = document.getElementById(`price${i}`).value || "";
+                    data[`subtotal${i}`] = (document.getElementById(`qty${i}`).value * document.getElementById(`price${i}`).value).toLocaleString();
                 }
 
                 doc.render(data);
                 const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-                saveAs(out, `訂購單_${data.vender}.docx`);
-
+                saveAs(out, `訂購單_${data.vender}_${data.date}.docx`);
             } catch (e) {
                 console.error(e);
-                alert("渲染失敗！請檢查 Word 標籤。可能原因：" + (e.properties?.errors?.[0]?.properties?.explanation || e.message));
+                alert("渲染出錯！請檢查 Word 模板標籤格式是否正確。");
             }
         });
     }
