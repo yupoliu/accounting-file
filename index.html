@@ -2,107 +2,78 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>歐米斯訂購單系統 - 完整功能版</title>
+    <title>歐米斯訂購單系統 - 最終修正版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
-        body { font-family: "Microsoft JhengHei", sans-serif; background: #f4f7f9; padding: 20px; color: #333; }
+        body { font-family: "Microsoft JhengHei", sans-serif; background: #f4f7f9; padding: 20px; }
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        h2 { color: #2b579a; border-bottom: 3px solid #2b579a; padding-bottom: 10px; margin-top: 0; }
-        .section-title { background: #e8f0fe; padding: 10px 15px; font-weight: bold; margin: 25px 0 10px; border-left: 5px solid #2b579a; color: #1a337e; }
-        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        label { font-size: 0.9em; font-weight: bold; display: block; margin-bottom: 5px; }
-        input[type="text"], input[type="date"], input[type="number"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        .checkbox-group { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 15px; background: #fafafa; border: 1px solid #eee; border-radius: 8px; }
-        .checkbox-item { display: flex; align-items: center; font-size: 0.9em; cursor: pointer; }
-        .checkbox-item input { margin-right: 8px; width: 18px; height: 18px; }
+        .section-title { background: #e8f0fe; padding: 10px; font-weight: bold; margin: 20px 0 10px; border-left: 5px solid #2b579a; }
+        .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+        input[type="text"], input[type="date"], input[type="number"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 15px; padding: 10px; background: #f9f9f9; border-radius: 4px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th { background: #2b579a; color: white; padding: 12px; font-size: 0.9em; text-align: center; }
-        td { padding: 8px; border: 1px solid #dee2e6; }
-        .summary-box { margin-top: 20px; text-align: right; font-size: 1.1em; font-weight: bold; color: #d32f2f; background: #fffde7; padding: 20px; border: 1px solid #ffe082; border-radius: 8px; }
-        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 10px; font-size: 1.25em; font-weight: bold; cursor: pointer; margin-top: 30px; transition: 0.3s; }
-        button:hover { background: #1a337e; transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        th { background: #2b579a; color: white; padding: 8px; }
+        td { border: 1px solid #ddd; padding: 5px; }
+        .summary { text-align: right; font-weight: bold; color: #d32f2f; padding: 15px; background: #fffde7; margin-top: 10px; }
+        button { width: 100%; padding: 15px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.2em; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>歐米斯生技有限公司 - 訂購單生成器</h2>
+    <h2>歐米斯生技 - 訂購單系統</h2>
     
     <div class="section-title">基本資料</div>
     <div class="grid">
-        <div><label>進貨廠商 {vender}</label><input type="text" id="vender" value="鎮江機械"></div>
-        <div><label>訂購日期 {date}</label><input type="date" id="date"></div>
-        <div><label>訂購單號 {order_no}</label><input type="text" id="order_no" value="DV20272881"></div>
-        <div><label>廠商電話 {tel}</label><input type="text" id="tel"></div>
-        <div><label>聯絡人 {contact}</label><input type="text" id="contact" value="張俊埼"></div>
-        <div><label>訂購人 {buyer}</label><input type="text" id="buyer" value="劉俊昇"></div>
+        <div><label>進貨廠商</label><input type="text" id="vender" value="鎮江機械"></div>
+        <div><label>訂購日期</label><input type="date" id="date"></div>
+        <div><label>訂購單號</label><input type="text" id="order_no" value="DV20272881"></div>
+        <div><label>廠商電話</label><input type="text" id="tel"></div>
+        <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼"></div>
+        <div><label>訂購人</label><input type="text" id="buyer" value="劉俊昇"></div>
     </div>
 
-    <div class="section-title">類別 (勾選會顯示 ■)</div>
+    <div class="section-title">類別</div>
     <div class="checkbox-group">
-        <label class="checkbox-item"><input type="checkbox" id="c_1"> 零用金 {c_1}</label>
-        <label class="checkbox-item"><input type="checkbox" id="c_2"> 實驗耗材/檢測 {c_2}</label>
-        <label class="checkbox-item"><input type="checkbox" id="c_3"> 設備 {c_3}</label>
-        <label class="checkbox-item"><input type="checkbox" id="c_4"> 小額採購 {c_4}</label>
-        <label class="checkbox-item"><input type="checkbox" id="c_5" checked> 其他 {c_5}</label>
+        <label><input type="checkbox" id="c_1"> 零用金</label>
+        <label><input type="checkbox" id="c_2"> 實驗耗材</label>
+        <label><input type="checkbox" id="c_3"> 設備</label>
+        <label><input type="checkbox" id="c_4"> 小額採購</label>
+        <label><input type="checkbox" id="c_5" checked> 其他</label>
     </div>
 
     <div class="section-title">付款方式</div>
     <div class="checkbox-group">
-        <label class="checkbox-item"><input type="checkbox" id="p_1"> 預付 {p_1}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_2"> 請款 {p_2}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_3" checked> 月結30日 {p_3}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_4"> 現金支付 {p_4}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_5"> 現金匯款 {p_5}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_6" checked> 帳戶匯款 {p_6}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_7"> 代墊 {p_7}</label>
-        <label class="checkbox-item"><input type="checkbox" id="p_8"> 支票 {p_8}</label>
+        <label><input type="checkbox" id="p_1"> 預付</label>
+        <label><input type="checkbox" id="p_2"> 請款</label>
+        <label><input type="checkbox" id="p_3" checked> 月結30日</label>
+        <label><input type="checkbox" id="p_6" checked> 帳戶匯款</label>
     </div>
 
-    <div class="section-title">品項明細 (7列)</div>
     <table>
-        <thead>
-            <tr><th>序</th><th>貨號 {num}</th><th>品項描述 {item}</th><th>數量 {qty}</th><th>單價 {price}</th><th>小計 {subtotal}</th></tr>
-        </thead>
+        <thead><tr><th>序</th><th>貨號</th><th>描述</th><th>數量</th><th>單價</th><th>小計</th></tr></thead>
         <tbody id="itemBody"></tbody>
     </table>
 
-    <div class="summary-box">
-        合計(未稅) {total_net}: NT. <span id="display_net">0</span><br>
-        稅額(5%) {tax}: NT. <span id="display_tax">0</span><br>
-        總計 {grand_total}: NT. <span id="display_grand">0</span>
+    <div class="summary">
+        合計: <span id="display_net">0</span> | 稅額: <span id="display_tax">0</span> | 總計: <span id="display_grand">0</span>
     </div>
 
-    <div class="section-title">簽核備註日期</div>
-    <div class="grid">
-        <div><label>制定日期</label><input type="date" id="issue_date"></div>
-        <div><label>批准日期</label><input type="date" id="approval_date"></div>
-        <div><label>請款日期</label><input type="date" id="request_date"></div>
-        <div><label>付款日期</label><input type="date" id="payment_date"></div>
-    </div>
-
-    <button onclick="generateDoc()">生成並下載 Word 訂購單</button>
+    <button onclick="generateDoc()">1. 確認並生成 Word</button>
 </div>
 
 <script>
-    // 初始化日期與品項表格
-    const today = new Date().toISOString().split('T')[0];
-    ['date', 'issue_date', 'approval_date', 'request_date', 'payment_date'].forEach(id => document.getElementById(id).value = today);
-
+    // 初始化表格
     const tbody = document.getElementById('itemBody');
     for (let i = 1; i <= 7; i++) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td align="center">${i}</td>
-            <td><input type="text" id="num${i}" placeholder="貨號"></td>
-            <td><input type="text" id="item${i}" placeholder="品項名稱"></td>
+        tr.innerHTML = `<td>${i}</td><td><input type="text" id="num${i}"></td><td><input type="text" id="item${i}"></td>
             <td><input type="number" id="qty${i}" value="0" oninput="calculate()"></td>
             <td><input type="number" id="price${i}" value="0" oninput="calculate()"></td>
-            <td id="sub_display${i}" align="right">0</td>
-        `;
+            <td id="sub${i}" align="right">0</td>`;
         tbody.appendChild(tr);
     }
 
@@ -112,7 +83,7 @@
             const q = parseFloat(document.getElementById(`qty${i}`).value) || 0;
             const p = parseFloat(document.getElementById(`price${i}`).value) || 0;
             const sub = q * p;
-            document.getElementById(`sub_display${i}`).innerText = sub.toLocaleString();
+            document.getElementById(`sub${i}`).innerText = sub.toLocaleString();
             totalNet += sub;
         }
         const tax = Math.round(totalNet * 0.05);
@@ -125,52 +96,46 @@
     function generateDoc() {
         const res = calculate();
         const getCheck = (id) => document.getElementById(id).checked ? "■" : "□";
-        const templateUrl = "https://yupoliu.github.io/accounting-file/template.docx?t=" + new Date().getTime();
+        const templateUrl = "https://yupoliu.github.io/accounting-file/template.docx?v=" + new Date().getTime();
 
         JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
-            if (error) { alert("讀取 Word 模板失敗，請檢查網路或檔案名稱！"); return; }
-            
+            if (error) { alert("無法讀取 template.docx"); return; }
+            const zip = new PizZip(content);
+            const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
+
+            const data = {
+                vender: document.getElementById('vender').value,
+                date: document.getElementById('date').value,
+                order_no: document.getElementById('order_no').value,
+                tel: document.getElementById('tel').value,
+                contact: document.getElementById('contact').value,
+                buyer: document.getElementById('buyer').value,
+                total_net: res.totalNet.toLocaleString(),
+                tax: res.tax.toLocaleString(),
+                grand_total: res.grand.toLocaleString(),
+                c_1: getCheck('c_1'), c_2: getCheck('c_2'), c_3: getCheck('c_3'), c_4: getCheck('c_4'), c_5: getCheck('c_5'),
+                p_3: getCheck('p_3'), p_6: getCheck('p_6'),
+                issue_date: document.getElementById('date').value,
+                approval_date: document.getElementById('date').value,
+                request_date: document.getElementById('date').value,
+                payment_date: document.getElementById('date').value
+            };
+
+            for (let i = 1; i <= 7; i++) {
+                data[`num${i}`] = document.getElementById(`num${i}`).value;
+                data[`item${i}`] = document.getElementById(`item${i}`).value;
+                data[`qty${i}`] = document.getElementById(`qty${i}`).value || "";
+                data[`price${i}`] = document.getElementById(`price${i}`).value || "";
+                data[`subtotal${i}`] = (document.getElementById(`qty${i}`).value * document.getElementById(`price${i}`).value).toLocaleString();
+            }
+
             try {
-                const zip = new PizZip(content);
-                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-
-                const data = {
-                    vender: document.getElementById('vender').value,
-                    date: document.getElementById('date').value,
-                    order_no: document.getElementById('order_no').value,
-                    tel: document.getElementById('tel').value,
-                    contact: document.getElementById('contact').value,
-                    buyer: document.getElementById('buyer').value,
-                    // 勾選框對應標籤
-                    c_1: getCheck('c_1'), c_2: getCheck('c_2'), c_3: getCheck('c_3'), c_4: getCheck('c_4'), c_5: getCheck('c_5'),
-                    p_1: getCheck('p_1'), p_2: getCheck('p_2'), p_3: getCheck('p_3'), p_4: getCheck('p_4'), p_5: getCheck('p_5'), p_6: getCheck('p_6'), p_7: getCheck('p_7'), p_8: getCheck('p_8'),
-                    // 金額合計
-                    total_net: res.totalNet.toLocaleString(),
-                    tax: res.tax.toLocaleString(),
-                    grand_total: res.grand.toLocaleString(),
-                    // 日期
-                    issue_date: document.getElementById('issue_date').value,
-                    approval_date: document.getElementById('approval_date').value,
-                    request_date: document.getElementById('request_date').value,
-                    payment_date: document.getElementById('payment_date').value
-                };
-
-                for (let i = 1; i <= 7; i++) {
-                    const q = parseFloat(document.getElementById(`qty${i}`).value) || 0;
-                    const p = parseFloat(document.getElementById(`price${i}`).value) || 0;
-                    data[`num${i}`] = document.getElementById(`num${i}`).value;
-                    data[`item${i}`] = document.getElementById(`item${i}`).value;
-                    data[`qty${i}`] = q || "";
-                    data[`price${i}`] = p ? p.toLocaleString() : "";
-                    data[`subtotal${i}`] = (q * p) ? (q * p).toLocaleString() : "";
-                }
-
                 doc.render(data);
                 const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
                 saveAs(out, `訂購單_${data.vender}.docx`);
             } catch (e) {
                 console.error(e);
-                alert("文件渲染失敗！原因可能是 Word 模板中的標籤格式有誤（例如標籤內包含空格）。");
+                alert("渲染出錯！請檢查 Word 標籤：" + e.properties.errors[0].message);
             }
         });
     }
