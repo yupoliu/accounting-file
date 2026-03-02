@@ -2,9 +2,9 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <title>歐米斯訂購單系統</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
+    <title>歐米斯訂購單系統 - 修正版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
     <style>
@@ -12,7 +12,6 @@
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { color: #2b579a; border-bottom: 3px solid #2b579a; padding-bottom: 10px; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
-        .section-title { background: #e8f0fe; padding: 8px 15px; font-weight: bold; margin: 20px 0 10px; border-left: 5px solid #2b579a; }
         input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         table { width: 100%; border-collapse: collapse; margin-top: 10px; }
         th { background: #2b579a; color: white; padding: 8px; font-size: 0.9em; }
@@ -32,60 +31,33 @@
         <div><label>訂購日期</label><input type="date" id="date"></div>
         <div><label>訂購單號</label><input type="text" id="order_no" value="DV20272881"></div>
         <div><label>廠商電話</label><input type="text" id="tel"></div>
-        <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼 0966540307"></div>
+        <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼"></div>
         <div><label>訂購人</label><input type="text" id="buyer" value="劉俊昇"></div>
     </div>
 
-    <div class="section-title">品項明細 (對應模板 7 列)</div>
-    <table>
+    <table id="itemTable">
         <thead>
-            <tr>
-                <th width="5%">序</th>
-                <th width="15%">貨號</th>
-                <th width="40%">品項描述</th>
-                <th width="10%">數量</th>
-                <th width="15%">單價(未稅)</th>
-                <th width="15%">小計</th>
-            </tr>
+            <tr><th>序</th><th>貨號</th><th>品項描述</th><th>數量</th><th>單價(未稅)</th><th>小計</th></tr>
         </thead>
-        <tbody id="itemBody">
-            </tbody>
+        <tbody id="itemBody"></tbody>
     </table>
 
     <div class="summary-box">
-        合計(未稅) {total_net}: NT. <span id="display_net">0</span><br>
-        稅額 (5%) {tax}: NT. <span id="display_tax">0</span><br>
-        總計 {grand_total}: NT. <span id="display_grand">0</span>
+        合計: NT. <span id="display_net">0</span> | 稅額: NT. <span id="display_tax">0</span> | 總計: NT. <span id="display_grand">0</span>
     </div>
 
-    <div class="section-title">備註日期</div>
-    <div class="grid">
-        <div><label>制定日期</label><input type="date" id="issue_date"></div>
-        <div><label>批准日期</label><input type="date" id="approval_date"></div>
-        <div><label>請款日期</label><input type="date" id="request_date"></div>
-        <div><label>付款日期</label><input type="date" id="payment_date"></div>
-    </div>
-
-    <button onclick="generateDoc()">1. 確認計算並下載 Word 檔案</button>
+    <button onclick="generateDoc()">生成並下載訂購單</button>
 </div>
 
 <script>
-    // 設定初始日期
-    const today = new Date().toISOString().split('T')[0];
-    ['date', 'issue_date', 'approval_date', 'request_date', 'payment_date'].forEach(id => document.getElementById(id).value = today);
-
-    // 動態生成 7 列
+    // 初始化表格
     const tbody = document.getElementById('itemBody');
     for (let i = 1; i <= 7; i++) {
         const tr = document.createElement('tr');
-        tr.innerHTML = `
-            <td>${i}</td>
-            <td><input type="text" id="num${i}" placeholder="貨號"></td>
-            <td><input type="text" id="item${i}" placeholder="描述"></td>
-            <td><input type="number" id="qty${i}" value="0" oninput="calculate()"></td>
-            <td><input type="number" id="price${i}" value="0" oninput="calculate()"></td>
-            <td id="sub_display${i}" style="text-align:right">0</td>
-        `;
+        tr.innerHTML = `<td>${i}</td><td><input type="text" id="num${i}"></td><td><input type="text" id="item${i}"></td>
+                        <td><input type="number" id="qty${i}" value="0" oninput="calculate()"></td>
+                        <td><input type="number" id="price${i}" value="0" oninput="calculate()"></td>
+                        <td id="sub_display${i}" style="text-align:right">0</td>`;
         tbody.appendChild(tr);
     }
 
@@ -107,64 +79,44 @@
 
     function generateDoc() {
         const res = calculate();
-        const data = {
-            vender: document.getElementById('vender').value,
-            date: document.getElementById('date').value,
-            order_no: document.getElementById('order_no').value,
-            tel: document.getElementById('tel').value,
-            contact: document.getElementById('contact').value,
-            buyer: document.getElementById('buyer').value,
-            total_net: res.totalNet.toLocaleString(),
-            tax: res.tax.toLocaleString(),
-            grand_total: res.grand.toLocaleString(),
-            issue_date: document.getElementById('issue_date').value,
-            approval_date: document.getElementById('approval_date').value,
-            request_date: document.getElementById('request_date').value,
-            payment_date: document.getElementById('payment_date').value,
-            // 預設勾選
-            c_5: "■", p_3: "■", p_6: "■" 
-        };
+        const templateUrl = "https://yupoliu.github.io/accounting-file/template.docx?t=" + new Date().getTime();
 
-        // 填充 7 列數據
-        for (let i = 1; i <= 7; i++) {
-            const q = parseFloat(document.getElementById(`qty${i}`).value) || 0;
-            const p = parseFloat(document.getElementById(`price${i}`).value) || 0;
-            data[`num${i}`] = document.getElementById(`num${i}`).value;
-            data[`item${i}`] = document.getElementById(`item${i}`).value;
-            data[`qty${i}`] = q || "";
-            data[`price${i}`] = p ? p.toLocaleString() : "";
-            data[`subtotal${i}`] = (q * p) ? (q * p).toLocaleString() : "";
-        }
+        JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
+            if (error) { alert("讀取模板失敗！"); return; }
+            
+            try {
+                const zip = new PizZip(content);
+                const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
 
-// 1. 定義絕對路徑並加上時間戳記避免快取
-const templateUrl = "https://yupoliu.github.io/accounting-file/template.docx?t=" + new Date().getTime();
+                const data = {
+                    vender: document.getElementById('vender').value,
+                    date: document.getElementById('date').value,
+                    order_no: document.getElementById('order_no').value,
+                    tel: document.getElementById('tel').value,
+                    contact: document.getElementById('contact').value,
+                    buyer: document.getElementById('buyer').value,
+                    total_net: res.totalNet.toLocaleString(),
+                    tax: res.tax.toLocaleString(),
+                    grand_total: res.grand.toLocaleString(),
+                    c_5: "■", p_3: "■", p_6: "■" // 預設勾選
+                };
 
-JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
-    if (error) { 
-        console.error(error);
-        alert("讀取失敗！這可能是因為 GitHub Pages 尚未同步更新。\n請嘗試按下 Ctrl+F5 強制重新整理，或使用無痕視窗開啟。"); 
-        return; 
-    }
-    
-    try {
-        const zip = new PizZip(content);
-        const doc = new window.docxtemplater(zip, { paragraphLoop: true, linebreaks: true });
-        
-        // 2. 執行渲染
-        doc.render(data);
-        
-        const out = doc.getZip().generate({ 
-            type: "blob", 
-            mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" 
+                for (let i = 1; i <= 7; i++) {
+                    data[`num${i}`] = document.getElementById(`num${i}`).value;
+                    data[`item${i}`] = document.getElementById(`item${i}`).value;
+                    data[`qty${i}`] = document.getElementById(`qty${i}`).value || "";
+                    data[`price${i}`] = document.getElementById(`price${i}`).value || "";
+                    data[`subtotal${i}`] = (document.getElementById(`qty${i}`).value * document.getElementById(`price${i}`).value).toLocaleString();
+                }
+
+                doc.render(data);
+                const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+                saveAs(out, `訂購單_${data.vender}.docx`);
+            } catch (e) {
+                console.error(e);
+                alert("渲染失敗！請檢查 Word 標籤。");
+            }
         });
-        
-        // 3. 下載檔案
-        saveAs(out, `訂購單_${data.vender}_${data.date}.docx`);
-    } catch (e) {
-        console.error(e);
-        alert("文件渲染出錯，請檢查 Word 模板中的標籤是否正確。");
-    }
-});
     }
 </script>
 </body>
