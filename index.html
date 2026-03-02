@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>歐米斯生技 - 訂購單系統</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pizzip/3.1.4/pizzip.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/2.6.1/jszip.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/docxtemplater/3.37.2/docxtemplater.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip-utils/0.1.0/jszip-utils.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
@@ -12,14 +12,15 @@
         .container { max-width: 950px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .section-title { background: #e8f0fe; padding: 10px; font-weight: bold; margin: 20px 0 10px; border-left: 5px solid #2b579a; }
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
-        label { font-size: 0.9em; font-weight: bold; }
+        label { font-size: 0.9em; font-weight: bold; display: block; margin-bottom: 5px; }
         input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-top: 5px; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { background: #2b579a; color: white; padding: 10px; }
         td { border: 1px solid #ddd; padding: 8px; }
-        .summary { text-align: right; background: #fffde7; padding: 20px; border: 1px solid #ffe082; font-weight: bold; margin-top: 20px; }
-        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.25em; cursor: pointer; margin-top: 20px; }
+        .summary { text-align: right; background: #fffde7; padding: 20px; border: 1px solid #ffe082; font-weight: bold; margin-top: 20px; line-height: 1.6; }
+        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.25em; cursor: pointer; margin-top: 20px; transition: 0.3s; }
+        button:hover { background: #1a337e; }
     </style>
 </head>
 <body>
@@ -76,7 +77,7 @@
 </div>
 
 <script>
-    // 初始化日期與表格
+    // 自動填入今日日期與生成 7 列
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
     const tbody = document.getElementById('itemBody');
     for (let i = 1; i <= 7; i++) {
@@ -107,18 +108,19 @@
     function generateDoc() {
         const res = calculate();
         const getM = (id) => document.getElementById(id).checked ? "▓" : "☐";
-        // 2. 加上隨機數確保讀取到最新上傳的 template.docx
+        
+        // 使用絕對路徑並強制刷新快取
         const templateUrl = "template.docx?v=" + new Date().getTime();
 
         JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
-            if (error) { alert("讀取 Word 模板失敗！請確認檔案已上傳至 GitHub。"); return; }
+            if (error) { 
+                alert("讀取 template.docx 失敗！請確認檔案已上傳至 GitHub。"); 
+                return; 
+            }
             try {
-                // 使用 window.PizZip 確保正確引用
-                const zip = new window.PizZip(content);
-                const doc = new window.docxtemplater(zip, { 
-                    paragraphLoop: true, linebreaks: true,
-                    nullGetter() { return ""; }
-                });
+                // 改用 JSZip 來處理內容
+                const zip = new JSZip(content);
+                const doc = new window.docxtemplater().loadZip(zip);
 
                 const data = {
                     vender: document.getElementById('vender').value,
@@ -130,10 +132,9 @@
                     total_net: res.totalNet.toLocaleString(),
                     tax: res.tax.toLocaleString(),
                     grand_total: res.grand.toLocaleString(),
-                    // 對應模板中的勾選框標籤
                     c_1: getM('c_1'), c_2: getM('c_2'), c_3: getM('c_3'), c_4: getM('c_4'), c_5: getM('c_5'),
                     p_1: getM('p_1'), p_2: getM('p_2'), p_3: getM('p_3'), p_4: getM('p_4'), p_5: getM('p_5'), p_6: getM('p_6'), p_7: getM('p_7'), p_8: getM('p_8'),
-                    // 底部簽核日期（預設同步訂購日期）
+                    // 簽核日期標籤補全
                     issue_date: document.getElementById('date').value,
                     approval_date: document.getElementById('date').value,
                     request_date: document.getElementById('date').value,
@@ -141,19 +142,24 @@
                 };
 
                 for (let i = 1; i <= 7; i++) {
-                    data[`num${i}`] = document.getElementById(`num${i}`).value;
-                    data[`item${i}`] = document.getElementById(`item${i}`).value;
-                    data[`qty${i}`] = document.getElementById(`qty${i}`).value || "";
-                    data[`price${i}`] = document.getElementById(`price${i}`).value || "";
-                    data[`subtotal${i}`] = (document.getElementById(`qty${i}`).value * document.getElementById(`price${i}`).value).toLocaleString();
+                    data["num"+i] = document.getElementById("num"+i).value;
+                    data["item"+i] = document.getElementById("item"+i).value;
+                    data["qty"+i] = document.getElementById("qty"+i).value || "";
+                    data["price"+i] = document.getElementById("price"+i).value || "";
+                    data["subtotal"+i] = (document.getElementById("qty"+i).value * document.getElementById("price"+i).value).toLocaleString();
                 }
 
-                doc.render(data);
-                const out = doc.getZip().generate({ type: "blob", mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
-                saveAs(out, `訂購單_${data.vender}_${data.date}.docx`);
+                doc.setData(data);
+                doc.render();
+
+                const out = doc.getZip().generate({
+                    type: "blob",
+                    mimeType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                });
+                saveAs(out, `訂購單_${data.vender}.docx`);
             } catch (e) {
                 console.error(e);
-                alert("渲染出錯！請檢查 Word 模板標籤格式是否正確。");
+                alert("生成失敗！請確認 Word 模板中的標籤 {} 是否正確閉合。");
             }
         });
     }
