@@ -14,13 +14,12 @@
         .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         label { font-size: 0.9em; font-weight: bold; display: block; margin-bottom: 5px; }
         input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; margin-top: 5px; }
+        .checkbox-group { display: flex; flex-wrap: wrap; gap: 10px; background: #fafafa; padding: 15px; border-radius: 8px; border: 1px solid #eee; }
         table { width: 100%; border-collapse: collapse; margin-top: 15px; }
         th { background: #2b579a; color: white; padding: 10px; }
         td { border: 1px solid #ddd; padding: 8px; }
-        .summary { text-align: right; background: #fffde7; padding: 20px; border: 1px solid #ffe082; font-weight: bold; margin-top: 20px; line-height: 1.6; }
-        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.25em; cursor: pointer; margin-top: 20px; transition: 0.3s; }
-        button:hover { background: #1a337e; }
+        .summary { text-align: right; background: #fffde7; padding: 20px; border: 1px solid #ffe082; font-weight: bold; margin-top: 20px; }
+        button { width: 100%; padding: 20px; background: #2b579a; color: white; border: none; border-radius: 8px; font-size: 1.25em; cursor: pointer; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -35,10 +34,10 @@
         <div><label>訂購單號</label><input type="text" id="order_no" value="DV20272881"></div>
         <div><label>廠商電話</label><input type="text" id="tel" value="0212345678"></div>
         <div><label>聯絡人</label><input type="text" id="contact" value="張俊埼"></div>
-        <div><label>訂購人 {buyer}</label><input type="text" id="buyer" value="劉俊昇"></div>
+        <div><label>訂購人</label><input type="text" id="buyer" value="劉俊昇"></div>
     </div>
 
-    <div class="section-title">2. 類別 {c_1}~{c_5}</div>
+    <div class="section-title">2. 類別</div>
     <div class="checkbox-group">
         <label><input type="checkbox" id="c_1"> 零用金</label>
         <label><input type="checkbox" id="c_2"> 實驗耗材/檢測</label>
@@ -47,37 +46,36 @@
         <label><input type="checkbox" id="c_5" checked> 其他</label>
     </div>
 
-    <div class="section-title">3. 付款方式 {p_1}~{p_8}</div>
+    <div class="section-title">3. 付款方式</div>
     <div class="checkbox-group">
+        <label><input type="checkbox" id="p_3" checked> 月結30日</label>
+        <label><input type="checkbox" id="p_6" checked> 帳戶匯款</label>
         <label><input type="checkbox" id="p_1"> 預付</label>
         <label><input type="checkbox" id="p_2"> 請款</label>
-        <label><input type="checkbox" id="p_3" checked> 月結30日</label>
         <label><input type="checkbox" id="p_4"> 現金支付</label>
         <label><input type="checkbox" id="p_5"> 現金匯款</label>
-        <label><input type="checkbox" id="p_6" checked> 帳戶匯款</label>
         <label><input type="checkbox" id="p_7"> 代墊</label>
         <label><input type="checkbox" id="p_8"> 支票</label>
     </div>
 
-    <div class="section-title">4. 品項明細</div>
     <table>
         <thead>
-            <tr><th>序</th><th>貨號</th><th>品項描述</th><th>數量</th><th>單價</th><th>小計</th></tr>
+            <tr><th>序</th><th>貨號</th><th>品項</th><th>數量</th><th>單價</th><th>小計</th></tr>
         </thead>
         <tbody id="itemBody"></tbody>
     </table>
 
     <div class="summary">
-        合計 (未稅) {total_net}: <span id="display_net">0</span><br>
-        稅額 (5%) {tax}: <span id="display_tax">0</span><br>
-        總計 {grand_total}: <span id="display_grand">0</span>
+        合計 (未稅): <span id="display_net">0</span><br>
+        稅額 (5%): <span id="display_tax">0</span><br>
+        總計: <span id="display_grand">0</span>
     </div>
 
     <button onclick="generateDoc()">生成並下載訂購單</button>
 </div>
 
 <script>
-    // 自動填入今日日期與生成 7 列
+    // 初始化日期與表格
     document.getElementById('date').value = new Date().toISOString().split('T')[0];
     const tbody = document.getElementById('itemBody');
     for (let i = 1; i <= 7; i++) {
@@ -109,16 +107,14 @@
         const res = calculate();
         const getM = (id) => document.getElementById(id).checked ? "▓" : "☐";
         
-        // 使用絕對路徑並強制刷新快取
+        // 使用 cache-busting 確保讀取最新模板
         const templateUrl = "template.docx?v=" + new Date().getTime();
 
         JSZipUtils.getBinaryContent(templateUrl, function(error, content) {
-            if (error) { 
-                alert("讀取 template.docx 失敗！請確認檔案已上傳至 GitHub。"); 
-                return; 
-            }
+            if (error) { alert("讀取模板失敗，請確認 template.docx 存在。"); return; }
+            
             try {
-                // 改用 JSZip 來處理內容
+                // 改用穩定的 JSZip 載入方式解決 constructor 錯誤
                 const zip = new JSZip(content);
                 const doc = new window.docxtemplater().loadZip(zip);
 
@@ -133,8 +129,8 @@
                     tax: res.tax.toLocaleString(),
                     grand_total: res.grand.toLocaleString(),
                     c_1: getM('c_1'), c_2: getM('c_2'), c_3: getM('c_3'), c_4: getM('c_4'), c_5: getM('c_5'),
-                    p_1: getM('p_1'), p_2: getM('p_2'), p_3: getM('p_3'), p_4: getM('p_4'), p_5: getM('p_5'), p_6: getM('p_6'), p_7: getM('p_7'), p_8: getM('p_8'),
-                    // 簽核日期標籤補全
+                    p_1: getM('p_1'), p_2: getM('p_2'), p_3: getM('p_3'), p_4: getM('p_4'), 
+                    p_5: getM('p_5'), p_6: getM('p_6'), p_7: getM('p_7'), p_8: getM('p_8'),
                     issue_date: document.getElementById('date').value,
                     approval_date: document.getElementById('date').value,
                     request_date: document.getElementById('date').value,
@@ -159,7 +155,7 @@
                 saveAs(out, `訂購單_${data.vender}.docx`);
             } catch (e) {
                 console.error(e);
-                alert("生成失敗！請確認 Word 模板中的標籤 {} 是否正確閉合。");
+                alert("渲染失敗！請檢查 Word 模板中的標籤 {} 是否正確閉合。");
             }
         });
     }
